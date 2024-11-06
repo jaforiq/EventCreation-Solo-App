@@ -2,21 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Calendar, MapPin } from 'lucide-react';
 import axios from 'axios';
-
-interface EventData {
-  title: string;
-  details: string;
-  location: string;
-  startDate: string;
-  endDate: string;
-  thumbnailUrl: string;
-}
+import { EventData } from '@/Interfaces/event';
 
 const EventDetails: React.FC = () => {
   const [event, setEvent] = useState<EventData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { id } = useParams<{ id: any }>();
+  const { id } = useParams<{ id: string }>();
 
   useEffect(() => {
     fetchEventDetails();
@@ -26,7 +18,6 @@ const EventDetails: React.FC = () => {
   const fetchEventDetails = async () => {
     try {
       const response = await axios.get(`http://localhost:3000/api/events/get/${id}`, {headers: {authorization: `Bearer ${token}`}});
-
       const result = response.data.data;
       setEvent(result);
     } catch (err) {

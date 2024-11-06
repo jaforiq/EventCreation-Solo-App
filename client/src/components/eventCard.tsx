@@ -1,92 +1,89 @@
-import { Box, Button, Image, Text, Tooltip } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
-import { event } from '../Interfaces/event';
 import axios from 'axios';
+import { useEffect, useState } from "react";
+import DefaultSpinner from './DefaultSpinner';
 import { useNavigate } from "react-router-dom";
+import { EventData } from '../Interfaces/event';
+import emptyImage from '../../public/empty-folder.png';
+import { Button, ButtonGroup, Card, CardBody, CardFooter, Heading, Image, Stack, Text, useToast } from "@chakra-ui/react";
 
+interface EventCardProps {
+  events: EventData[],
+  setEvents: React.Dispatch<React.SetStateAction<EventData[]>>
+}
 
-const EventCard = () => {
+const EventCard = (props: EventCardProps) => {
+  const [isLoading, setLoading] = useState<boolean>(true);
+  const { events, setEvents } = props;
 
-  const [events, setEvents] = useState([{
-    id: 0,
-    title: '',
-    details: '',
-    thumbnailUrl:''
-  }]);
-
-  const token = localStorage.getItem('token');
-  useEffect(() => {
-    fatchEvents(token as string);
-  }, [token]); 
-
-  const fatchEvents = async (token: string) => {
-    const response = await axios.get('http://localhost:3000/api/events/all',);
-
-    const res = response.data.data;
-    if(!res){
-      throw new Error('Failed to fetch event details');
-    }
-    const result = response.data.data.map((res: event) => ({
-      id: res.id,
-      title: res.title,
-      details: res.details,
-      thumbnailUrl: res.thumbnailUrl
-    }));
-    setEvents(result);
-  }
-
+  const toast = useToast();
   const navigate = useNavigate();
-  const handleEditClick = (e: React.MouseEvent, eventId: Number) => {
+  const token = localStorage.getItem('token');
+  const handleCardClick = (eventId: number) => navigate(`/eventdetails/${eventId}`);
+
+  const handleEditClick = (e: React.MouseEvent, eventId: number) => {
     e.stopPropagation();
     navigate(`/editevent/${eventId}`);
   }
 
-  const handleCardClick = (eventId: Number) => {
-    navigate(`/eventdetails/${eventId}`);
+  const handleDeleteClick = async (e: React.MouseEvent, eventId: number) => {
+    e.stopPropagation();
+    const response = await axios.delete(`http://localhost:3000/api/events/delete/${eventId}`, {
+      headers: { authorization: `Bearer ${token}` },
+    });
+
+    const isDeleted = response.status === 200;
+    if (!isDeleted) return;
+
+    const updatedEvents = events.filter(e => e.id !== eventId);
+    setEvents([...updatedEvents]);
+
+    toast({
+      title: 'Event Deleted',
+      description: `${response.data.message}`,
+      status: 'warning',
+      duration: 2000,
+      isClosable: true,
+    })
   }
-console.log("events: ", events);
+
   return (
     <div className="w-full mt-5">
-    <div className="flex flex-wrap justify-center items-center mx-auto w-full gap-8">
-      {events.length > 0 && events.map(res => (
-        <Box 
-        key={res.id} 
-        maxW="sm" 
-        borderWidth="1px" 
-        borderRadius="lg" 
-        overflow="hidden"
-        onClick={() => handleCardClick(res.id)}
-        cursor="pointer"
-        _hover={{ boxShadow: 'lg' }}
-        >
-          <Image src={res.thumbnailUrl} alt={res.title} />
-          <Box p="6">
-            <Box fontWeight="bold" as="h4" lineHeight="tight">
-              {res.title}
-            </Box>
-            <Text mt="2" fontSize="sm">
-              {res.details}
-            </Text>
-            <Box mt="4" display="flex" gap="2">
-              <Button 
-              variant="solid" 
-              colorScheme="teal"
-              onClick={(e) => handleEditClick(e, res.id)}
-              ></Button>
-              <Button variant="ghost" colorScheme="teal">Delete</Button>
-            </Box>
-          </Box>
-        </Box>
-      ))}
+      <div className="flex flex-wrap justify-center items-center mx-auto w-full gap-8">
+        {events.length > 0 && events.map(res => (
+          <Card className='cursor-pointer' maxW='sm' key={res.id} onClick={() => handleCardClick(res.id)}>
+            <CardBody>
+              <Image
+                className='m-auto h-[15rem]'
+                src={res.thumbnailUrl ?? emptyImage}
+                alt={res.title}
+                objectFit='cover'
+                borderRadius='lg'
+              />
+              <Stack mt='6' spacing='3'>
+                <Heading size='md' className='max-h-[30px] truncate'>{res.title}</Heading>
+                <Text className='h-[120px] overflow-scroll text-ellipsis[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'>{res.details}</Text>
+                {/* <Text color='blue.600' fontSize='2xl'>
+                  $450
+                </Text> */}
+              </Stack>
+            </CardBody>
+            {/* <Divider /> */}
+            <CardFooter>
+              <ButtonGroup spacing='2'>
+                <Button variant='solid' colorScheme='blue' onClick={async (e) => await handleEditClick(e, res.id)}>
+                  Edit
+                </Button>
+                <Button variant='ghost' colorScheme='blue' onClick={async (e) => await handleDeleteClick(e, res.id)}>
+                  Delete
+                </Button>
+              </ButtonGroup>
+            </CardFooter>
+          </Card>
+        ))}
       </div>
     </div>
   );
-  
+
 }
 
 export default EventCard;
-
-
-
-
-

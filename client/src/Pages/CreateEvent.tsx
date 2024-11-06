@@ -1,20 +1,19 @@
-import React, {  useEffect, useState } from 'react';
-import { Calendar, Upload } from 'lucide-react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { genre } from '../Interfaces/genre';
 import '@preline/select';
+import axios from 'axios';
+import { Input, useToast } from '@chakra-ui/react';
+import { genre } from '../Interfaces/genre';
+import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import { MultiSelect } from 'react-multi-select-component';
-
-
+import { todayAsLocaleString } from '@/common/dateExtensions';
 
 const EventCreationForm: React.FC = () => {
   const [eventData, setEventData] = useState({
     title: '',
     details: '',
     location: '',
-    startDate: '',
-    endDate: '',
+    startDate: todayAsLocaleString(),
+    endDate: todayAsLocaleString(),
     genreId: [],
     thumbnailUrl: null as string | null,
   });
@@ -26,7 +25,8 @@ const EventCreationForm: React.FC = () => {
     value: ''
   }]);
 
-  
+  const toast = useToast();
+
   const token = localStorage.getItem('token');
   useEffect(() => {
     fetchGenres(token as string);
@@ -34,12 +34,14 @@ const EventCreationForm: React.FC = () => {
 
   const fetchGenres = async (token: string) => {
     try {
-      const response = await axios.get('http://localhost:3000/api/genres', {headers: {authorization: `Bearer ${token}`}});
+      const response = await axios.get('http://localhost:3000/api/genres', { headers: { authorization: `Bearer ${token}` } });
       console.log("data", response.data.data);
 
       const result = response.data.data.map((res: genre) => (
-        {label: res.name,
-        value: res.id}
+        {
+          label: res.name,
+          value: res.id
+        }
       ))
       setOption(result);
       //console.log("Res: ",result);
@@ -71,7 +73,8 @@ const EventCreationForm: React.FC = () => {
   };
 
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => { console.log("inside Filechange");
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("inside Filechange");
     const cloudName = "dvrwupgzz";
     const presetName = "fr3ws4o";
     if (e.target.files && e.target.files) {
@@ -80,9 +83,11 @@ const EventCreationForm: React.FC = () => {
       formData.append('file', file);
       formData.append('upload_preset', presetName);
       axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, formData)
-      .then(res => { console.log("Res: ",res.data);
-        setEventData(prev => ({ ...prev, thumbnailUrl: res.data.secure_url}))})
-      .catch(err => console.log(err));      
+        .then(res => {
+          console.log("Res: ", res.data);
+          setEventData(prev => ({ ...prev, thumbnailUrl: res.data.secure_url }))
+        })
+        .catch(err => console.log(err));
     }
   };
 
@@ -90,15 +95,24 @@ const EventCreationForm: React.FC = () => {
   eventData.genreId = selected;
   //console.log("Data2: ", eventData.genreId);
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    console.log(eventData);
+
     e.preventDefault();
     const token = localStorage.getItem('token');
     //console.log('Event Data:', eventData);
-    axios.post("http://localhost:3000/api/events/create", eventData, {headers: {authorization: `Bearer ${token}`}} )
-    .then(res => {
-      console.log(res);
-      navigate("/");
-    })
-    .catch(err => console.log(err)); 
+    axios.post("http://localhost:3000/api/events/create", eventData, { headers: { authorization: `Bearer ${token}` } })
+      .then(res => {
+        console.log(res);
+        toast({
+          title: 'Event Created',
+          description: `${res.data.message}`,
+          status: 'success',
+          duration: 2000,
+          isClosable: true,
+        })
+        navigate("/");
+      })
+      .catch(err => console.log(err));
   };
   //{console.log(eventData.picture)}
   return (
@@ -146,27 +160,24 @@ const EventCreationForm: React.FC = () => {
           </div>
 
 
-          <MultiSelect 
-          options={options} 
-          value={selected}
-          onChange={setSelected}
-          labelledBy="Select">
-            
+          <MultiSelect
+            options={options}
+            value={selected}
+            onChange={setSelected}
+            labelledBy="Select">
           </MultiSelect>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">Start Date</label>
               <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Calendar className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="date"
+                <Input
                   id="startDate"
                   name="startDate"
                   required
-                  value={eventData.startDate}
+                  type="datetime-local"
+                  defaultValue={todayAsLocaleString()}
+                  // value={todayAsLocaleString()}
                   onChange={handleInputChange}
                   className="block w-full pl-10 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                 />
@@ -176,15 +187,13 @@ const EventCreationForm: React.FC = () => {
             <div>
               <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">End Date</label>
               <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Calendar className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="date"
+                <Input
+                  type="datetime-local"
                   id="endDate"
                   name="endDate"
                   required
-                  value={eventData.endDate}
+                  defaultValue={todayAsLocaleString()}
+                  // value={todayAsLocaleString()}
                   onChange={handleInputChange}
                   className="block w-full pl-10 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                 />
@@ -220,12 +229,11 @@ const EventCreationForm: React.FC = () => {
         </form>
 
         <div className="flex-1 mt-8 md:mt-0">
-          
           {eventData.thumbnailUrl ? (
             <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden">
-              <img 
+              <img
                 src={eventData.thumbnailUrl}
-                alt="Event Preview" 
+                alt="Event Preview"
                 className="object-cover w-full h-full"
               />
             </div>
