@@ -231,7 +231,7 @@ const EventCreationForm: React.FC = () => {
             </div>
           ) : (
             <div className="aspect-w-16 aspect-h-9 rounded-lg bg-gray-100 flex items-center justify-center">
-              <Upload className="h-12 w-12 text-gray-400" />
+              {/* <Upload className="h-12 w-12 text-gray-400" /> */}
             </div>
           )}
         </div>

@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import {BrowserRouter as Router, Route, Routes} from 'react-router-dom'
 import './App.css'
 import Register from './Auth/Register'
@@ -6,6 +5,8 @@ import Login from './Auth/Login'
 import Dashboard from './Pages/Dashboard'
 import CreateEvent from './Pages/CreateEvent'
 import  EventCard  from './components/eventCard'
+import EventDetails from './components/EventDetails'
+import EditEvent from './components/EditEvent'
 
 function App() {
   
@@ -18,6 +19,8 @@ function App() {
         <Route path='/login' element={<Login/>}></Route>
         <Route path='/createevent' element={<CreateEvent/>}></Route>
         <Route path='/eventcard' element={<EventCard/>}></Route>
+        <Route path='/eventdetails/:id' element={<EventDetails/>}></Route>
+        <Route path='/editevent/:id' element={<EditEvent/>}></Route>
       </Routes>
     </Router>
   )

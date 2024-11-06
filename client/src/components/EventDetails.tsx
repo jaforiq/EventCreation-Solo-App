@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Calendar, MapPin } from 'lucide-react';
+import axios from 'axios';
 
 interface EventData {
   title: string;
@@ -15,26 +16,25 @@ const EventDetails: React.FC = () => {
   const [event, setEvent] = useState<EventData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams<{ id: any }>();
 
   useEffect(() => {
-    const fetchEventDetails = async () => {
-      try {
-        const response = await fetch(`http://localhost:3000/api/events/get/${id}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch event details');
-        }
-        const data = await response.json();
-        setEvent(data);
-      } catch (err) {
-        setError('An error occurred while fetching event details. Please try again later.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchEventDetails();
   }, [id]);
+
+  const token = localStorage.getItem('token');
+  const fetchEventDetails = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3000/api/events/get/${id}`, {headers: {authorization: `Bearer ${token}`}});
+
+      const result = response.data.data;
+      setEvent(result);
+    } catch (err) {
+      setError('An error occurred while fetching event details. Please try again later.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   if (isLoading) {
     return <div className="text-center p-8">Loading event details...</div>;
@@ -52,7 +52,6 @@ const EventDetails: React.FC = () => {
     <div className="max-w-2xl mx-auto p-4">
       <img
         src={event.thumbnailUrl}
-        alt={event.title}
         className="w-full h-64 object-cover rounded-lg mb-6"
       />
       <h1 className="text-3xl font-bold mb-4">{event.title}</h1>

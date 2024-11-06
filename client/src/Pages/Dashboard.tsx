@@ -1,24 +1,3 @@
-// import React from 'react'
-
-// const Dashboard = () => {
-//   return (
-//     <div>
-//       <div>
-//         <img src="" alt="Girl in a jacket" width="500" height="600"/>
-//         <input type="text" name="input"></input>
-//         <button type="button">Login</button>
-//       <button type="button">Sign Up</button>
-//       </div>
-//       {/* <div>
-      
-//       </div> */}
-//       DashBoard
-//     </div>
-//   )
-// }
-
-// export default Dashboard
-
 
 import { Search, Globe, Menu } from 'lucide-react';
 import logo from "../images/ui-1.svg";
@@ -51,9 +30,9 @@ console.log("Login: ",isLogin)
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="border-b">
+      <header>
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-70">
             <div className="flex items-center gap-8">
               {/* Meetup Logo */}
               <a href="/" className="flex-shrink-0">
@@ -64,22 +43,22 @@ console.log("Login: ",isLogin)
                 />
               </a>
               {/* Search Bar */}
-              <div className="hidden md:flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2">
+              <div className="flex items-center bg-gray-100 rounded-full px-4 ">
                 <input
                   type="text"
                   placeholder="Search for keywords"
-                  className="bg-transparent border-none focus:outline-none text-sm w-75"
+                  className="bg-transparent border-none focus:outline-none text-lg w-75 h-50"
                 />
                 <Search className="h-5 w-5 text-gray-500" />
               </div>
-            </div>
+            </div> 
             
             {/* Navigation */}
             <nav className="hidden md:flex items-center gap-6">
               <button className="text-gray-700 hover:text-gray-900">Start a group</button>
               <div className="flex items-center gap-1">
                 <Globe className="h-5 w-5" />
-                {/* <ChevronDown className="h-4 w-4" /> */}
+                
                 English
               </div>
               {
@@ -105,16 +84,19 @@ console.log("Login: ",isLogin)
         </div>
       </header>
 
+      
+      <EventCard/>
+
+
+
+
       {/* Main Content */}
-      <main className="flex-1">
+      {/* <main className="flex-1">
         <div className="container mx-auto px-4 py-12">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               <h1 className="text-5xl font-bold">The people platform - Where interests become friendships</h1>
               <p className="text-xl text-gray-600">Whatever your interest, from hiking and reading to networking and skill sharing, there are thousands of people who share it on Meetup.</p>
-              <div className="space-y-4">
-                <button className="bg-blue-500 text-white px-6 py-3 rounded-md text-lg hover:bg-blue-600 w-full md:w-auto">Join Meetup</button>
-              </div>
             </div>
             <div className="hidden md:block">
               <img 
@@ -125,11 +107,11 @@ console.log("Login: ",isLogin)
             </div>
           </div>
         </div>
-      </main>
-      <EventCard/>
+      </main> */}
+      
 
       {/* Footer */}
-      <footer className="bg-gray-100">
+      {/* <footer className="bg-gray-100">
         <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div>
@@ -169,7 +151,7 @@ console.log("Login: ",isLogin)
             <p className="text-center text-gray-600">© 2024 Meetup clone</p>
           </div>
         </div>
-      </footer>
+      </footer> */}
     </div>
   );
 }
