@@ -53,20 +53,6 @@ const EventCreationForm: React.FC = () => {
   console.log("Gen: ", selected);
 
 
-  // const handleCreateGenre = async () => {     // create new genre
-
-  //   try {
-  //     const token = localStorage.getItem('token');
-  //     const response = await axios.post('http://localhost:3000/api/genres/create', { name: inputValue }, {headers: {authorization: `Bearer ${token}`}});
-  //     const newGenre = response.data;
-  //     setGenres([...genres, newGenre]);
-  //     // setSelectedGenres([...selectedGenres, newGenre]);
-  //     //setInputValue('');
-  //   } catch (error) {
-  //     console.error("Error creating genre:", error);
-  //   }
-  // };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setEventData(prev => ({ ...prev, [name]: value }));
@@ -93,26 +79,33 @@ const EventCreationForm: React.FC = () => {
 
   const navigate = useNavigate();
   eventData.genreId = selected;
-  //console.log("Data2: ", eventData.genreId);
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     console.log(eventData);
 
     e.preventDefault();
     const token = localStorage.getItem('token');
-    //console.log('Event Data:', eventData);
     axios.post("http://localhost:3000/api/events/create", eventData, { headers: { authorization: `Bearer ${token}` } })
       .then(res => {
         console.log(res);
         toast({
           title: 'Event Created',
-          description: `${res.data.message}`,
+          description: 'Event Created successfully',
           status: 'success',
           duration: 2000,
           isClosable: true,
         })
         navigate("/");
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        console.log(err)
+        toast({
+          title: 'Event Created',
+          description: 'Oops! Event not created.',
+          status: 'success',
+          duration: 2000,
+          isClosable: true,
+        })
+      });
   };
   //{console.log(eventData.picture)}
   return (

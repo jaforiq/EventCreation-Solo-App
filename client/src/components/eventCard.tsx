@@ -1,6 +1,4 @@
 import axios from 'axios';
-import { useEffect, useState } from "react";
-import DefaultSpinner from './DefaultSpinner';
 import { useNavigate } from "react-router-dom";
 import { EventData } from '../Interfaces/event';
 import emptyImage from '../../public/empty-folder.png';
@@ -12,7 +10,6 @@ interface EventCardProps {
 }
 
 const EventCard = (props: EventCardProps) => {
-  const [isLoading, setLoading] = useState<boolean>(true);
   const { events, setEvents } = props;
 
   const toast = useToast();
@@ -34,7 +31,7 @@ const EventCard = (props: EventCardProps) => {
     const isDeleted = response.status === 200;
     if (!isDeleted) return;
 
-    const updatedEvents = events.filter(e => e.id !== eventId);
+  const updatedEvents = events.filter(e => e.id !== eventId);
     setEvents([...updatedEvents]);
 
     toast({
@@ -50,7 +47,10 @@ const EventCard = (props: EventCardProps) => {
     <div className="w-full mt-5">
       <div className="flex flex-wrap justify-center items-center mx-auto w-full gap-8">
         {events.length > 0 && events.map(res => (
-          <Card className='cursor-pointer' maxW='sm' key={res.id} onClick={() => handleCardClick(res.id)}>
+          <Card className='cursor-pointer' 
+            maxW='sm' 
+            key={res.id} 
+            onClick={() => handleCardClick(res.id)}>
             <CardBody>
               <Image
                 className='m-auto h-[15rem]'
@@ -62,9 +62,6 @@ const EventCard = (props: EventCardProps) => {
               <Stack mt='6' spacing='3'>
                 <Heading size='md' className='max-h-[30px] truncate'>{res.title}</Heading>
                 <Text className='h-[120px] overflow-scroll text-ellipsis[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'>{res.details}</Text>
-                {/* <Text color='blue.600' fontSize='2xl'>
-                  $450
-                </Text> */}
               </Stack>
             </CardBody>
             {/* <Divider /> */}

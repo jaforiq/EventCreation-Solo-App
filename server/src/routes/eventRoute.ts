@@ -7,6 +7,7 @@ import {
   deleteEvent,
   getAllEvents,
   getEventsById,
+  userEvents,
 } from "../controllers/eventController";
 import { authenticateToken } from "../middleware/authMiddleware";
 
@@ -20,5 +21,6 @@ router.post("/create", authenticateToken, createEvent);
 router.put("/update/:id", authenticateToken, updateEvent);
 router.get("/get/:id", authenticateToken, getEventsById);
 router.delete("/delete/:id", authenticateToken, deleteEvent);
+router.get("/userevent", authenticateToken, userEvents);
 
 export default router;

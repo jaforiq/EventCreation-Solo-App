@@ -53,9 +53,17 @@ export const updateEvent: RequestHandler = async (
   res: Response
 ): Promise<void> => {
   const { id } = req.params;
-  const { title, details, location, startDate, endDate, genreId } = req.body;
+  const {
+    title,
+    details,
+    location,
+    startDate,
+    endDate,
+    genreId,
+    thumbnailUrl,
+  } = req.body;
   const userId = (req as any).user?.id;
-
+  console.log("req: ", req);
   try {
     const event = await Event.findOne({ where: { id, userId } });
 
@@ -64,7 +72,14 @@ export const updateEvent: RequestHandler = async (
       return;
     }
 
-    await event.update({ title, details, location, startDate, endDate });
+    await event.update({
+      title,
+      details,
+      location,
+      startDate,
+      endDate,
+      thumbnailUrl,
+    });
     res
       .status(200)
       .json({ message: "Event updated successfully", data: event });
@@ -122,6 +137,28 @@ export const getEventsById: RequestHandler = async (
 
   try {
     const event = await Event.findOne({ where: { id, userId } });
+
+    if (!event) {
+      res.status(404).json({ message: "Event not found or unauthorized" });
+      return;
+    }
+
+    res.status(200).json({ data: event });
+    return;
+  } catch (error) {
+    res.status(500).json({ message: "Error retrieving events", error });
+    return;
+  }
+};
+
+export const userEvents: RequestHandler = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const userId = (req as any).user?.id;
+
+  try {
+    const event = await Event.findAll({ where: { userId } });
 
     if (!event) {
       res.status(404).json({ message: "Event not found or unauthorized" });
