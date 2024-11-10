@@ -18,27 +18,22 @@ const EventDetails: React.FC = () => {
 
   useEffect(() => {
     fetchEventDetails();
-    fetchAttendy();
+    fetchUserAttendy();
+    fetchEventAttendy();
   }, [id]);
 
   const handleStatusChange = async (status: number) => {
-    //setSelectedStatus(status);
+    setSelectedStatus(status);
     
     // Increment the local count
     if (status === 1) {
-      setGoingCount(1);
-      setInterestedCount(0);
-      setNotGoingCount(0);
+      setGoingCount(goingCount + 1);
     }
     else if (status === 2) {
-      setGoingCount(0);
-      setInterestedCount(1);
-      setNotGoingCount(0);
+      setInterestedCount(interestedCount + 1);
     }
     else if (status === 3) {
-      setGoingCount(0);
-      setInterestedCount(0);
-      setNotGoingCount(1);
+      setNotGoingCount(notGoingCount + 1);
     }
   
     // Update the status in backend
@@ -52,23 +47,31 @@ const EventDetails: React.FC = () => {
   };
   
   const token = localStorage.getItem('token');
-  const fetchAttendy = async () => {
-    try{
+  const fetchUserAttendy = async () => {
       const res = await axios.get(`http://localhost:3000/api/attendy/get/${id}`, {headers: {authorization: `Bearer ${token}`}});
-      // if(!res.data.data) setSelectedStatus(0);
-      // else {
-      console.log("res: ",res)
-      const status = res.data?.data?.status ?? 0;
+    
+      //console.log("res: ",res.data);
+      const status = res.data?.status;
       setSelectedStatus(status);
-    //}
-    } catch(err) {
-      setError('An error occurred while fetching attendy details. Please try again later.');
-    }
+
+  }
+
+  const fetchEventAttendy = async () => {
+    const res = await axios.get(`http://localhost:3000/api/attendy/getallattendy/${id}`)  // get all attendy of a event
+    console.log('res: ', res);
+    const arr = res.data.arrStatus;
+    if(arr.length > 0){
+      for(let i = 0; i < arr.length; i++){
+        if(arr[i] === 1) setGoingCount(goingCount + 1);
+        if(arr[i] === 2) setInterestedCount(interestedCount + 1);
+        if(arr[i] === 3) setNotGoingCount(notGoingCount + 1);
+      }
+    } 
   }
 
   const fetchEventDetails = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/events/get/${id}`, {headers: {authorization: `Bearer ${token}`}});
+      const response = await axios.get(`http://localhost:3000/api/events/get/${id}`);  // fatch event details
       const result = response.data.data;
       setEvent(result);
       
@@ -114,15 +117,15 @@ const EventDetails: React.FC = () => {
         {/* //</div> */}
         <div className="ml-72 flex">
           <label>
-            <input type="radio" name="attendance" checked={selectedStatus == 1} onClick={() => handleStatusChange(1)} />
+            <input type="radio" name="attendance" checked={selectedStatus === 1} onClick={() => handleStatusChange(1)} />
             Going ({goingCount})
           </label>
           <label>
-            <input type="radio" name="attendance" checked={selectedStatus == 2} onClick={() => handleStatusChange(2)} />
+            <input type="radio" name="attendance" checked={selectedStatus === 2} onClick={() => handleStatusChange(2)} />
             Interested ({interestedCount})
           </label>
           <label>
-            <input type="radio" name="attendance" checked={selectedStatus == 3} onClick={() => handleStatusChange(3)} />
+            <input type="radio" name="attendance" checked={selectedStatus === 3} onClick={() => handleStatusChange(3)} />
             Not Going ({notGoingCount})
           </label>
         </div>

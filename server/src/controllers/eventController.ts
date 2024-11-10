@@ -133,10 +133,10 @@ export const getEventsById: RequestHandler = async (
   res: Response
 ): Promise<void> => {
   const { id } = req.params;
-  const userId = (req as any).user?.id;
+  //const userId = (req as any).user?.id;
 
   try {
-    const event = await Event.findOne({ where: { id, userId } });
+    const event = await Event.findOne({ where: { id } });
 
     if (!event) {
       res.status(404).json({ message: "Event not found or unauthorized" });

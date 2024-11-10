@@ -15,11 +15,11 @@ const router = express.Router();
 
 // Public route to get all events
 router.get("/all", getAllEvents);
+router.get("/get/:id", getEventsById);
 
 // Protected routes for authenticated users
 router.post("/create", authenticateToken, createEvent);
 router.put("/update/:id", authenticateToken, updateEvent);
-router.get("/get/:id", authenticateToken, getEventsById);
 router.delete("/delete/:id", authenticateToken, deleteEvent);
 router.get("/userevent", authenticateToken, userEvents);
 

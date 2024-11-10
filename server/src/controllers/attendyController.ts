@@ -3,12 +3,10 @@ import { Attendy } from "../models";
 
 export const createUpdateAttendy = async (req: Request, res: Response) => {
   const { eventId } = req.params;
-  //const eventId = id;
   const userId = (req as any).user?.id;
-  console.log("id: ", eventId, userId);
+
   const attendy = await Attendy.findOne({ where: { eventId, userId } });
   const { status } = req.body;
-  console.log("Attendy: ", attendy);
   if (!attendy) {
     try {
       const newAttendy = await Attendy.create({
@@ -27,9 +25,7 @@ export const createUpdateAttendy = async (req: Request, res: Response) => {
     }
   } else {
     try {
-      await attendy.update({
-        status,
-      });
+      await attendy.update({ status });
 
       res
         .status(201)
@@ -41,24 +37,51 @@ export const createUpdateAttendy = async (req: Request, res: Response) => {
   }
 };
 
+// If login user give attendy previously
 export const getAttendy = async (req: Request, res: Response) => {
   const { eventId } = req.params;
-  //const eventId = id;
   const userId = (req as any).user?.id;
-  //console.log("id: ", eventId, userId);
 
   try {
-    const attendy = await Attendy.findOne({ where: { eventId, userId } });
-
-    if (!attendy) {
-      res.status(404).json({ message: "Attendy not found or unauthorized" });
+    const attendy = await Attendy.findOne({
+      where: { eventId, userId },
+      attributes: ["status"],
+    });
+    if (attendy) {
+      res.status(200).json(attendy.dataValues);
+    } else {
+      res.status(200).json({ status: 0 });
       return;
     }
 
-    res.status(200).json({ data: attendy });
     return;
   } catch (error) {
     res.status(500).json({ message: "Error retrieving attendy", error });
     return;
   }
+};
+
+// All attendy related to the event
+export const getAllEventAttendy = async (req: Request, res: Response) => {
+  const { eventId } = req.params;
+
+  const attendy = await Attendy.findAll({
+    where: { eventId },
+    attributes: ["status"],
+  });
+  console.log("Attendy: ", attendy);
+  const arrStatus: number[] = attendy.map((a) => a.dataValues.status);
+  // for (let i = 0; i < attendy.length; i++) {
+  //   const val = attendy[i].dataValues.status;
+  //   arrStatus.push(val);
+  // }
+
+  if (attendy) {
+    res.status(200).json({ arrStatus });
+  } else {
+    const emptyArr: number[] = [];
+    res.status(200).json({ emptyArr });
+    return;
+  }
+  //if (attendy) res.status(200).json({ data: attendy });
 };
