@@ -1,12 +1,11 @@
-import { DataTypes, Model, Sequelize } from 'sequelize';
-
+import { DataTypes, Model, Sequelize } from "sequelize";
 
 class Attendy extends Model {
   public id!: number;
-  public status!: 'Going' | 'Interested' | 'Not Going';
+  public status!: number;
   public eventId!: number; // Foreign key for Event
   public userId!: number; // Foreign key for User
-  
+
   static initModel(sequelize: Sequelize) {
     Attendy.init(
       {
@@ -16,29 +15,29 @@ class Attendy extends Model {
           primaryKey: true,
         },
         status: {
-          type: DataTypes.ENUM('Going', 'Interested', 'Not Going'),
+          type: DataTypes.INTEGER,
           allowNull: false,
         },
         eventId: {
           type: DataTypes.INTEGER,
           references: {
-            model: 'events',
-            key: 'id',
+            model: "events",
+            key: "id",
           },
           allowNull: false,
         },
         userId: {
           type: DataTypes.INTEGER,
           references: {
-            model: 'users',
-            key: 'id',
+            model: "users",
+            key: "id",
           },
           allowNull: false,
-        }        
+        },
       },
       {
         sequelize,
-        tableName: 'attendies',
+        tableName: "attendies",
       }
     );
   }

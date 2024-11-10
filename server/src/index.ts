@@ -5,6 +5,8 @@ import userRoutes from "./routes/userRoute";
 import eventRoutes from "./routes/eventRoute";
 import genreRouters from "./routes/genreRoute";
 import loginorNot from "./routes/authRoute";
+import attendyRouters from "./routes/attendyRoute";
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -19,6 +21,7 @@ app.use("/api", loginorNot);
 app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/genres", genreRouters);
+app.use("/api/attendy", attendyRouters);
 
 sequelize.sync({ alter: true }).then(() => {
   console.log("Database connected and User table created");
