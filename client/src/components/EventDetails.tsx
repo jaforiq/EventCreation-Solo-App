@@ -3,6 +3,9 @@ import { useParams } from 'react-router-dom';
 import { Calendar, MapPin } from 'lucide-react';
 import axios from 'axios';
 import { EventData } from '@/Interfaces/event';
+import { FaStar } from 'react-icons/fa';
+import { IoMdCheckmarkCircle } from 'react-icons/io';
+import { MdDangerous } from 'react-icons/md';
 
 const EventDetails: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -20,9 +23,20 @@ const EventDetails: React.FC = () => {
     fetchEventDetails();
     fetchUserAttendy();
     fetchEventAttendy();
-  }, [id]);
+  }, [id, goingCount, interestedCount, notGoingCount]);
 
   const handleStatusChange = async (status: number) => {
+    console.log('select: ', selectedStatus);
+    // changing previous selected value
+    if (selectedStatus === 1) {
+      setGoingCount(goingCount - 1);
+    }
+    else if (selectedStatus === 2) {
+      setInterestedCount(interestedCount - 1);
+    }
+    else if (selectedStatus === 3) {
+      setNotGoingCount(notGoingCount - 1);
+    }
     setSelectedStatus(status);
     
     // Increment the local count
@@ -125,20 +139,19 @@ const EventDetails: React.FC = () => {
           <span>
             {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}
           </span>
-        {/* //</div> */}
-        <div className="ml-72 flex">
-          <label>
-            <input type="radio" name="attendance" checked={selectedStatus === 1} onClick={() => handleStatusChange(1)} />
-            Going ({goingCount})
-          </label>
-          <label>
-            <input type="radio" name="attendance" checked={selectedStatus === 2} onClick={() => handleStatusChange(2)} />
-            Interested ({interestedCount})
-          </label>
-          <label>
-            <input type="radio" name="attendance" checked={selectedStatus === 3} onClick={() => handleStatusChange(3)} />
-            Not Going ({notGoingCount})
-          </label>
+        <div className="ml-72 flex gap-4">
+          <div onClick={() => handleStatusChange(1)} className={selectedStatus === 1 ? "text-green-500" : "text-gray-500"}>
+          <IoMdCheckmarkCircle className="w-6 h-6 cursor-pointer" />
+          <span>Going ({goingCount})</span>
+          </div>
+          <div onClick={() => handleStatusChange(2)} className={selectedStatus === 2 ? "text-blue-500" : "text-gray-500"}>            
+            <FaStar className="w-6 h-6 cursor-pointer" />
+              <span>Interested ({interestedCount})</span>
+          </div>
+          <div onClick={() => handleStatusChange(3)} className={selectedStatus === 3 ? "text-red-500" : "text-gray-500"}>
+            <MdDangerous className="w-6 h-6 cursor-pointer" />
+              <span>Not Going ({notGoingCount})</span>
+          </div>
         </div>
       </div>
     </div>

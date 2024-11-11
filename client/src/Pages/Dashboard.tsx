@@ -48,27 +48,6 @@ function App() {
     setLoading(false);
   }, []);
 
-  // const onSearch = async () => {
-  //   const title = searchByTitleRef.current!.value.length > 0;
-  //   const location = searchByLocationRef.current!.value.length > 0;
-
-  //   if (!title && !location) await fetchEvents();
-
-  //   console.log(searchByTitleRef.current!.value);
-
-  //   let searchedEvents = events;
-  //   if (title) {
-  //     searchedEvents = searchedEvents.filter(event => event.title.toLowerCase().includes(searchByTitleRef.current!.value.toLocaleLowerCase()));
-  //   }
-
-  //   if (location) {
-  //     searchedEvents.forEach(s => console.log(s));
-  //     searchedEvents = searchedEvents.filter(event => event.location?.toLowerCase().includes(searchByLocationRef.current!.value.toLocaleLowerCase()));
-  //     console.log(searchedEvents, 'coming');
-  //   }
-
-  //   setEvents([...searchedEvents]);
-  // };
 
   const onSearch = async () => {
     const title = searchByTitleRef.current!.value.trim();
