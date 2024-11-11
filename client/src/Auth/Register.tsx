@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import "../App.css";
-import Axios from "axios";
+import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+import { useToast } from "@chakra-ui/react";
 
 const Register = () => {
   const [username, setUsername] = useState("");
@@ -9,21 +10,38 @@ const Register = () => {
   const [password, setPassword] = useState("");
 
   const navigate = useNavigate()
+  const toast = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    Axios.post("http://localhost:3000/api/users/signup", {
+    axios.post("http://localhost:3000/api/users/signup", {
       username,
       email,
-      password,
+      password
     }).then(response => {
-        if(response.data) {
-          navigate('/login')
-        }
+      toast({
+        title: 'SignUp ',
+        description: 'User signup successfully',
+        status: 'success',
+        duration: 2000,
+        isClosable: true,
+      })
+      if(response.data) {
+        navigate('/login')
+      }
     }).catch(err => {
-        console.log(err)
+      toast({
+        title: 'SignUp failed',
+        description: 'Username and Email must be unique',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      })
+      console.log(err)
     })
   };
+
+
   return (
     <div className="sign-up-container">
       <form className="sign-up-form" onSubmit={handleSubmit}>
@@ -32,6 +50,7 @@ const Register = () => {
         <input
           type="text"
           placeholder="Username"
+          required
           onChange={(e) => setUsername(e.target.value)}
         />
 
@@ -40,6 +59,7 @@ const Register = () => {
           type="email"
           autoComplete="off"
           placeholder="Email"
+          required
           onChange={(e) => setEmail(e.target.value)}
         />
 
@@ -47,6 +67,7 @@ const Register = () => {
         <input
           type="password"
           placeholder="******"
+          required
           onChange={(e) => setPassword(e.target.value)}
         />
 

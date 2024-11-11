@@ -58,14 +58,25 @@ const EventDetails: React.FC = () => {
 
   const fetchEventAttendy = async () => {
     const res = await axios.get(`http://localhost:3000/api/attendy/getallattendy/${id}`)  // get all attendy of a event
-    console.log('res: ', res);
     const arr = res.data.arrStatus;
+    console.log('arr: ', arr);
     if(arr.length > 0){
-      for(let i = 0; i < arr.length; i++){
-        if(arr[i] === 1) setGoingCount(goingCount + 1);
-        if(arr[i] === 2) setInterestedCount(interestedCount + 1);
-        if(arr[i] === 3) setNotGoingCount(notGoingCount + 1);
+      let tempGoing = 0;
+      let tempInterested = 0;
+      let tempNotGoing = 0;
+
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i] === 1) tempGoing += 1;
+        else if (arr[i] === 2) tempInterested += 1;
+        else if (arr[i] === 3) tempNotGoing += 1;
       }
+
+      setGoingCount(tempGoing);
+      setInterestedCount(tempInterested);
+      setNotGoingCount(tempNotGoing);
+
+      //console.log('Going: ', goingCount);
+      //console.log('Notgoing: ', notGoingCount);
     } 
   }
 

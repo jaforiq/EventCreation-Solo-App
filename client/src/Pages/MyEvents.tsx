@@ -26,12 +26,20 @@ const YourEvents: React.FC = () => {
       });
 
       console.log('res: ', response.data.data);
-      setEvents(response.data.data);
+      if(response.data.data.length === 0){
+        toast({
+          title: 'Event',
+          description: 'You have not create any events',
+          status: 'error',
+          duration: 5000
+        })
+      } else 
+        setEvents(response.data.data);
     } catch (error) {
       console.error('Error fetching your events:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch your events. Please try again.",
+        description: "Failed to fetch your events",
         status: "error",
         duration: 3000,
         isClosable: true,

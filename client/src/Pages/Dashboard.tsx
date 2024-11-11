@@ -48,27 +48,54 @@ function App() {
     setLoading(false);
   }, []);
 
+  // const onSearch = async () => {
+  //   const title = searchByTitleRef.current!.value.length > 0;
+  //   const location = searchByLocationRef.current!.value.length > 0;
+
+  //   if (!title && !location) await fetchEvents();
+
+  //   console.log(searchByTitleRef.current!.value);
+
+  //   let searchedEvents = events;
+  //   if (title) {
+  //     searchedEvents = searchedEvents.filter(event => event.title.toLowerCase().includes(searchByTitleRef.current!.value.toLocaleLowerCase()));
+  //   }
+
+  //   if (location) {
+  //     searchedEvents.forEach(s => console.log(s));
+  //     searchedEvents = searchedEvents.filter(event => event.location?.toLowerCase().includes(searchByLocationRef.current!.value.toLocaleLowerCase()));
+  //     console.log(searchedEvents, 'coming');
+  //   }
+
+  //   setEvents([...searchedEvents]);
+  // };
+
   const onSearch = async () => {
-    const doesSearchByTitleHasValue = searchByTitleRef.current!.value.length > 0;
-    const doesSearchByLocationHasValue = searchByLocationRef.current!.value.length > 0;
-
-    if (!doesSearchByTitleHasValue && !doesSearchByLocationHasValue) await fetchEvents();
-
-    console.log(searchByTitleRef.current!.value);
-
+    const title = searchByTitleRef.current!.value.trim();
+    const location = searchByLocationRef.current!.value.trim();
+  
+    // Fetch all events if both inputs are empty
+    if (!title && !location) {
+      await fetchEvents();
+      return;
+    }
+  
+    // Filter events based on the search inputs
     let searchedEvents = events;
-    if (doesSearchByTitleHasValue) {
-      searchedEvents = searchedEvents.filter(event => event.title.toLowerCase().includes(searchByTitleRef.current!.value.toLocaleLowerCase()));
+    if (title) {
+      searchedEvents = searchedEvents.filter(event =>
+        event.title.toLowerCase().includes(title.toLowerCase())
+      );
     }
-
-    if (doesSearchByLocationHasValue) {
-      searchedEvents.forEach(s => console.log(s));
-      searchedEvents = searchedEvents.filter(event => event.location?.toLowerCase().includes(searchByLocationRef.current!.value.toLocaleLowerCase()));
-      console.log(searchedEvents, 'coming');
+    if (location) {
+      searchedEvents = searchedEvents.filter(event =>
+        event.location?.toLowerCase().includes(location.toLowerCase())
+      );
     }
-
+  
     setEvents([...searchedEvents]);
   };
+  
 
   const logout = () => {
     localStorage.removeItem('token');
@@ -95,9 +122,9 @@ function App() {
               </a>
               {/* Search Bar */}
               <InputGroup>
-                <Input ref={searchByTitleRef} type='text' className='m-0 rounded-l-lg' placeholder='Search by event title' />
-                <Input ref={searchByLocationRef} type='text' className='m-0' rounded={'none'} placeholder='Search by location' />
-                <InputRightAddon children={<Search className="h-5 w-5" />} onClick={async () => await onSearch()} />
+                <Input ref={searchByTitleRef} type='text' className='m-0 rounded-l-lg' placeholder='Search by event title' onChange={() => onSearch()}/>
+                <Input ref={searchByLocationRef} type='text' className='m-0' rounded={'none'} placeholder='Search by location' onChange={() => onSearch()}/>
+                <InputRightAddon children={<Search className="h-5 w-5" />} onChange={() => onSearch()} />
               </InputGroup>
             </div>
 

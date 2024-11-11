@@ -59,23 +59,48 @@ const EventCreationForm: React.FC = () => {
   };
 
 
+  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   console.log("inside Filechange");
+  //   const cloudName = "dvrwupgzz";
+  //   const presetName = "fr3ws4o";
+  //   if (e.target.files && e.target.files) {
+  //     const file = e.target.files[0];
+  //     const formData = new FormData();
+  //     formData.append('file', file);
+  //     formData.append('upload_preset', presetName);
+  //     axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, formData)
+  //       .then(res => {
+  //         console.log("Res: ", res.data);
+  //         setEventData(prev => ({ ...prev, thumbnailUrl: res.data.secure_url }))
+  //       })
+  //       .catch(err => console.log(err));
+  //   }
+  // };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("inside Filechange");
+    console.log("Inside FileChange");
     const cloudName = "dvrwupgzz";
     const presetName = "fr3ws4o";
-    if (e.target.files && e.target.files) {
+    
+    if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       const formData = new FormData();
       formData.append('file', file);
       formData.append('upload_preset', presetName);
-      axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, formData)
-        .then(res => {
-          console.log("Res: ", res.data);
-          setEventData(prev => ({ ...prev, thumbnailUrl: res.data.secure_url }))
+  
+      fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: 'POST',
+        body: formData,
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log("Res:", data);
+          setEventData(prev => ({ ...prev, thumbnailUrl: data.secure_url }));
         })
-        .catch(err => console.log(err));
+        .catch(error => console.log(error));
     }
   };
+  
 
   const navigate = useNavigate();
   eventData.genreId = selected;
@@ -99,9 +124,9 @@ const EventCreationForm: React.FC = () => {
       .catch(err => {
         console.log(err)
         toast({
-          title: 'Event Created',
+          title: 'Event',
           description: 'Oops! Event not created.',
-          status: 'success',
+          status: 'error',
           duration: 2000,
           isClosable: true,
         })

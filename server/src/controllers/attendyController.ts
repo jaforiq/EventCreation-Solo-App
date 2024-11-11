@@ -69,8 +69,8 @@ export const getAllEventAttendy = async (req: Request, res: Response) => {
     where: { eventId },
     attributes: ["status"],
   });
-  console.log("Attendy: ", attendy);
   const arrStatus: number[] = attendy.map((a) => a.dataValues.status);
+  console.log("Event Attendy: : ", arrStatus);
   // for (let i = 0; i < attendy.length; i++) {
   //   const val = attendy[i].dataValues.status;
   //   arrStatus.push(val);
