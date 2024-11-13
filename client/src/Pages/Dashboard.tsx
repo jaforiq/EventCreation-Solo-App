@@ -1,4 +1,4 @@
-
+import { debounce } from 'lodash';
 import { Search, Globe, Menu } from 'lucide-react';
 import logo from "../images/ui-1.svg";
 import { Link } from 'react-router-dom';
@@ -14,29 +14,79 @@ function App() {
   const [events, setEvents] = useState<EventData[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
   const [loginUserId, setLoginUserId] = useState(0);
+  const [page, setPage] = useState(1);
+  const pageSize = 30;
 
   const searchByTitleRef = createRef<HTMLInputElement>();
   const searchByLocationRef = createRef<HTMLInputElement>();
 
+  // const fetchEvents = async () => {
+  //   const response = await axios.get('http://localhost:3000/api/events/all');
+
+  //   const res = response.data.data;
+  //   console.log('res: ', res);
+  //   if (!res) {
+  //     throw new Error('Failed to fetch event details');
+  //   }
+  //   const result = response.data.data.map((res: event) => ({
+  //     id: res.id,
+  //     title: res.title,
+  //     details: res.details,
+  //     thumbnailUrl: res.thumbnailUrl,
+  //     location: res.location,
+  //     userId: res.userId
+  //   }));
+  //   setEvents(result);
+  // }
   const fetchEvents = async () => {
-    const response = await axios.get('http://localhost:3000/api/events/all');
-
-    const res = response.data.data;
-    console.log('res: ', res);
-    if (!res) {
-      throw new Error('Failed to fetch event details');
+    let count = 0;
+    
+    try {
+      count = count + 1;
+      console.log('count: ',count);
+      const response = await axios.get(`http://localhost:3000/api/events/all`, {
+        params: { page, pageSize },
+      });
+      const res = response.data.data;
+      if (res) {
+        const newEvents = res.map((event: event) => ({
+          id: event.id,
+          title: event.title,
+          details: event.details,
+          thumbnailUrl: event.thumbnailUrl,
+          location: event.location,
+          userId: event.userId,
+        }));
+        setEvents((prevEvents) => [...prevEvents, ...newEvents]);
+      } else {
+        throw new Error('Failed to fetch event details');
+      }
+    } catch (error) {
+      console.error(error);
     }
-    const result = response.data.data.map((res: event) => ({
-      id: res.id,
-      title: res.title,
-      details: res.details,
-      thumbnailUrl: res.thumbnailUrl,
-      location: res.location,
-      userId: res.userId
-    }));
-    setEvents(result);
-  }
+  };
 
+  // Fetch the initial page of events
+  useEffect(() => {
+    fetchEvents();
+  }, [page]);
+
+  // Function to load more events when the user scrolls to the bottom
+  const handleScroll = () => {
+    if (
+      window.innerHeight + document.documentElement.scrollTop !==
+      document.documentElement.offsetHeight
+    )
+      return;
+    setPage((prevPage) => prevPage + 1);
+  };
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // For checking user is login or not
   useEffect(() => {
     setLoading(true);
 
@@ -54,32 +104,60 @@ function App() {
   }, []);
 
 
-  const onSearch = async () => {
-    const title = searchByTitleRef.current!.value.trim();
-    const location = searchByLocationRef.current!.value.trim();
+  // const onSearch = async () => {
+  //   const title = searchByTitleRef.current!.value.trim();
+  //   const location = searchByLocationRef.current!.value.trim();
   
-    // Fetch all events if both inputs are empty
-    if (!title && !location) {
-      await fetchEvents();
+  //   // Fetch all events if both inputs are empty
+  //   if (!title && !location) {
+  //     await fetchEvents();
+  //     return;
+  //   }
+  
+  //   // Filter events based on the search inputs
+  //   let searchedEvents = events;
+  //   if (title) {
+  //     searchedEvents = searchedEvents.filter(event =>
+  //       event.title.toLowerCase().includes(title.toLowerCase())
+  //     );
+  //   }
+  //   if (location) {
+  //     searchedEvents = searchedEvents.filter(event =>
+  //       event.location?.toLowerCase().includes(location.toLowerCase())
+  //     );
+  //   }
+  
+  //   setEvents([...searchedEvents]);
+  // };
+
+  // const debounce = (func: (...args: any) => void, delay: number) => {
+  //   let timeoutId: NodeJS.Timeout;
+  //   return (...args: any) => {
+  //     clearTimeout(timeoutId);
+  //     timeoutId = setTimeout(() => func(...args), delay);
+  //   };
+  // };
+
+  const onSearch = debounce(async () => {
+    const title = searchByTitleRef.current?.value.trim();
+    const location = searchByLocationRef.current?.value.trim();
+  
+    if (!title) {
+      await fetchEvents(); // Fetch all events if the title is empty
       return;
     }
   
-    // Filter events based on the search inputs
-    let searchedEvents = events;
-    if (title) {
-      searchedEvents = searchedEvents.filter(event =>
-        event.title.toLowerCase().includes(title.toLowerCase())
-      );
+    try {
+      const response = await axios.get(`http://localhost:3000/api/events/searchtitle?title=${encodeURIComponent(title)}`)
+      const searchResults = response.data.data;
+console.log('src Res: ', searchResults);
+      setEvents(searchResults);
+    } catch (error) {
+      console.error('Error fetching search results:', error);
     }
-    if (location) {
-      searchedEvents = searchedEvents.filter(event =>
-        event.location?.toLowerCase().includes(location.toLowerCase())
-      );
-    }
+  }, 3000);  
   
-    setEvents([...searchedEvents]);
-  };
-  
+  console.log('event.len: ', events.length);
 
   const logout = () => {
     localStorage.removeItem('token');

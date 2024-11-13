@@ -18,7 +18,7 @@ const seedEvents = async (numEvents, batchSize = 1000) => {
           location: faker.location.city(),
           startDate: faker.date.future(),
           endDate: faker.date.future(),
-          userId: faker.number.int({ min: 1, max: 10 }), // assuming 100 users
+          userId: faker.number.int({ min: 1, max: 10 }), // assuming 10 users
         };
 
         newEventData.push(eventData);
@@ -33,11 +33,11 @@ const seedEvents = async (numEvents, batchSize = 1000) => {
       for (const event of createdEvents) {
         const numGenres = faker.number.int({ min: 1, max: 3 });
         const randomGenres = faker.helpers.arrayElements(genres, numGenres);
-
+        console.log("randomgenre: ", randomGenres);
         for (const genre of randomGenres) {
           await EventGenre.create({
             eventId: event.id,
-            genreId: genre.id,
+            genreId: genre,
           });
         }
 

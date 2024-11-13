@@ -13,7 +13,7 @@ interface EventCardProps {
 const EventCard = (props: EventCardProps) => {
   const { events, setEvents, loginUserId } = props;
 
-
+console.log('card: ', events.length);
   const toast = useToast();
   const navigate = useNavigate();
   const token = localStorage.getItem('token');

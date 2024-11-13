@@ -1,6 +1,7 @@
 import { Request, RequestHandler, Response } from "express";
 import Event from "../models/Event";
 import { EventGenre } from "../models";
+import { Op } from "sequelize";
 
 export const createEvent: RequestHandler = async (
   req: Request,
@@ -114,17 +115,40 @@ export const deleteEvent: RequestHandler = async (
   }
 };
 
+// export const getAllEvents: RequestHandler = async (
+//   req: Request,
+//   res: Response
+// ): Promise<void> => {
+//   try {
+//     const events = await Event.findAll();
+//     res.status(200).json({ data: events });
+//     return;
+//   } catch (error) {
+//     res.status(500).json({ message: "Error retrieving events", error });
+//     return;
+//   }
+// };
+let count = 0;
 export const getAllEvents: RequestHandler = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    const events = await Event.findAll();
+    count = count + 1;
+    console.log("count: ", count);
+    const { page = 1, pageSize = 20 } = req.query;
+    const limit = parseInt(pageSize as string, 10);
+    const offset = (parseInt(page as string, 10) - 1) * limit;
+    console.log("offset: ", limit, offset);
+    const events = await Event.findAll({
+      limit,
+      offset,
+      //order: [["startDate", "ASC"]], // Optional: order events
+    });
+
     res.status(200).json({ data: events });
-    return;
   } catch (error) {
     res.status(500).json({ message: "Error retrieving events", error });
-    return;
   }
 };
 
@@ -159,6 +183,36 @@ export const userEvents: RequestHandler = async (
   try {
     const event = await Event.findAll({ where: { userId } });
 
+    if (!event) {
+      res.status(404).json({ message: "Event not found or unauthorized" });
+      return;
+    }
+
+    res.status(200).json({ data: event });
+    return;
+  } catch (error) {
+    res.status(500).json({ message: "Error retrieving events", error });
+    return;
+  }
+};
+
+export const searchEvent: RequestHandler = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  //const userId = (req as any).user?.id;
+  const { title } = req.query;
+  console.log("Title: ", title);
+
+  try {
+    const event = await Event.findAll({
+      where: {
+        title: {
+          [Op.iLike]: `%${title}%`,
+        },
+      },
+    });
+    console.log("Event: ", event);
     if (!event) {
       res.status(404).json({ message: "Event not found or unauthorized" });
       return;

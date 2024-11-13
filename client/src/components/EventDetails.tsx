@@ -25,7 +25,7 @@ const EventDetails: React.FC = () => {
     fetchEventDetails();
     fetchUserAttendy();
     fetchEventAttendy();
-  }, [id, goingCount, interestedCount, notGoingCount]);
+  }, [id, goingCount, interestedCount, notGoingCount, goingUserName]);
 
   const handleStatusChange = async (status: number) => {
     console.log('select: ', selectedStatus);
