@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction, RequestHandler } from "express";
+import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
 const secretKey = "your_secret_key"; // Use environment variables in production
@@ -14,7 +14,9 @@ export const authLoginOrNot = (req: Request, res: Response) => {
   jwt.verify(token, secretKey, (err, user) => {
     if (err) return res.status(200).json({ status: false });
     (req as any).user = user; // attach user data to request
-    res.status(200).json({ status: true });
+    //console.log("Req: ", (req as any).user.id);
+    const userId = (req as any).user.id;
+    res.status(200).json({ status: true, id: userId });
   });
   return;
 };

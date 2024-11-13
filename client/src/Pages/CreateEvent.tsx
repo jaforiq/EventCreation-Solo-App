@@ -195,7 +195,7 @@ const EventCreationForm: React.FC = () => {
                   required
                   type="datetime-local"
                   defaultValue={todayAsLocaleString()}
-                  // value={todayAsLocaleString()}
+                  min={todayAsLocaleString()}
                   onChange={handleInputChange}
                   className="block w-full pl-10 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                 />
@@ -211,7 +211,7 @@ const EventCreationForm: React.FC = () => {
                   name="endDate"
                   required
                   defaultValue={todayAsLocaleString()}
-                  // value={todayAsLocaleString()}
+                  min={todayAsLocaleString()}
                   onChange={handleInputChange}
                   className="block w-full pl-10 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                 />

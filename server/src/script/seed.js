@@ -1,79 +1,57 @@
-import { faker } from "@faker-js/faker";
-import sequelize, { User, Event, Genre, EventGenre, Attendy } from "./models";
+const { faker } = require("@faker-js/faker");
+const { Event, EventGenre } = require("../models");
 
-async function createUsers() {
-  const users = [];
-  for (let i = 0; i < 1000; i++) {
-    users.push({
-      username: faker.internet.userName(),
-      email: faker.internet.email(),
-      password: faker.internet.password(),
-    });
-  }
-  await User.bulkCreate(users);
-}
-
-async function createEvents() {
-  const events = [];
-  for (let i = 0; i < 3000; i++) {
-    events.push({
-      title: faker.lorem.words(),
-      details: faker.lorem.paragraph(),
-      thumbnailUrl: faker.image.imageUrl(),
-      location: faker.address.city(),
-      startDate: faker.date.future(),
-      endDate: faker.date.future(),
-      userId: faker.datatype.number({ min: 1, max: 1000 }),
-    });
-  }
-  await Event.bulkCreate(events);
-}
-
-async function createGenres() {
-  const genres = [];
-  for (let i = 0; i < 10; i++) {
-    genres.push({ name: faker.music.genre() });
-  }
-  await Genre.bulkCreate(genres);
-}
-
-async function createEventGenres() {
-  const eventGenres = [];
-  for (let i = 0; i < 5000; i++) {
-    eventGenres.push({
-      eventId: faker.datatype.number({ min: 1, max: 3000 }),
-      genreId: faker.datatype.number({ min: 1, max: 10 }),
-    });
-  }
-  await EventGenre.bulkCreate(eventGenres);
-}
-
-async function createAttendies() {
-  const attendies = [];
-  for (let i = 0; i < 5000; i++) {
-    attendies.push({
-      status: faker.datatype.number({ min: 1, max: 3 }),
-      eventId: faker.datatype.number({ min: 1, max: 3000 }),
-      userId: faker.datatype.number({ min: 1, max: 1000 }),
-    });
-  }
-  await Attendy.bulkCreate(attendies);
-}
-
-async function seedDatabase() {
+const seedEvents = async (numEvents, batchSize = 1000) => {
   try {
-    await sequelize.sync(); // Reset tables
-    //await createUsers();
-    await createGenres();
-    await createEvents();
-    //await createEventGenres();
-    //await createAttendies();
-    console.log("Database seeded successfully!");
-  } catch (error) {
-    console.error("Error seeding database:", error);
-  } finally {
-    await sequelize.close();
-  }
-}
+    const genres = [1, 2, 3, 4, 5, 6, 7];
+    const totalBatches = Math.ceil(numEvents / batchSize);
 
-//seedDatabase();
+    for (let batch = 0; batch < totalBatches; batch++) {
+      const events = [];
+      const newEventData = [];
+
+      for (let i = 0; i < batchSize && batch * batchSize + i < numEvents; i++) {
+        const eventData = {
+          title: faker.lorem.words(),
+          details: faker.lorem.paragraph(),
+          thumbnailUrl: faker.image.url(),
+          location: faker.location.city(),
+          startDate: faker.date.future(),
+          endDate: faker.date.future(),
+          userId: faker.number.int({ min: 1, max: 10 }), // assuming 100 users
+        };
+
+        newEventData.push(eventData);
+      }
+
+      // Bulk insert events
+      const createdEvents = await Event.bulkCreate(newEventData, {
+        returning: true,
+      });
+
+      // Add genres to each event
+      for (const event of createdEvents) {
+        const numGenres = faker.number.int({ min: 1, max: 3 });
+        const randomGenres = faker.helpers.arrayElements(genres, numGenres);
+
+        for (const genre of randomGenres) {
+          await EventGenre.create({
+            eventId: event.id,
+            genreId: genre.id,
+          });
+        }
+
+        events.push(event);
+      }
+
+      console.log(`Batch ${batch + 1} processed successfully.`);
+    }
+
+    console.log(`${numEvents} events seeded successfully.`);
+  } catch (error) {
+    console.error("Error seeding events:", error);
+  }
+};
+
+// Usage: call the function with 10,000 events and a batch size of 1000
+seedEvents(10000, 1000);

@@ -17,4 +17,5 @@ export interface EventData {
   startDate: string;
   endDate: string;
   thumbnailUrl: string;
+  userId: number;
 }

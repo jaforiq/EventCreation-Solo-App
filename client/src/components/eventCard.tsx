@@ -7,10 +7,12 @@ import { Button, ButtonGroup, Card, CardBody, CardFooter, Heading, Image, Stack,
 interface EventCardProps {
   events: EventData[],
   setEvents: React.Dispatch<React.SetStateAction<EventData[]>>
+  loginUserId: number
 }
 
 const EventCard = (props: EventCardProps) => {
-  const { events, setEvents } = props;
+  const { events, setEvents, loginUserId } = props;
+
 
   const toast = useToast();
   const navigate = useNavigate();
@@ -65,7 +67,10 @@ const EventCard = (props: EventCardProps) => {
               </Stack>
             </CardBody>
             {/* <Divider /> */}
-            <CardFooter>
+            {
+              res.userId === loginUserId ? ( 
+              <>
+              <CardFooter>
               <ButtonGroup spacing='2'>
                 <Button variant='solid' colorScheme='blue' onClick={async (e) => await handleEditClick(e, res.id)}>
                   Edit
@@ -75,6 +80,13 @@ const EventCard = (props: EventCardProps) => {
                 </Button>
               </ButtonGroup>
             </CardFooter>
+              </>
+              ): (<div>
+              <CardFooter>
+                <ButtonGroup spacing='2'></ButtonGroup>
+              </CardFooter>
+              </div>)
+            }            
           </Card>
         ))}
       </div>

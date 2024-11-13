@@ -6,6 +6,7 @@ import { EventData } from '@/Interfaces/event';
 import { FaStar } from 'react-icons/fa';
 import { IoMdCheckmarkCircle } from 'react-icons/io';
 import { MdDangerous } from 'react-icons/md';
+import { Button, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
 
 const EventDetails: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -18,6 +19,7 @@ const EventDetails: React.FC = () => {
   const [interestedCount, setInterestedCount] = useState(0);
   const [notGoingCount, setNotGoingCount] = useState(0);
   const [selectedStatus, setSelectedStatus] = useState<number | null>(null);
+  const [goingUserName, setgoingUserName] = useState<string[]>([]);
 
   useEffect(() => {
     fetchEventDetails();
@@ -72,27 +74,45 @@ const EventDetails: React.FC = () => {
 
   const fetchEventAttendy = async () => {
     const res = await axios.get(`http://localhost:3000/api/attendy/getallattendy/${id}`)  // get all attendy of a event
-    const arr = res.data.arrStatus;
-    console.log('arr: ', arr);
-    if(arr.length > 0){
+    const statusArr = res.data.arrStatus;
+    const allAttendyId = res.data.arrUserId;
+    //console.log('arr: ', res.data.arrUserId);
+    if(statusArr.length > 0){
       let tempGoing = 0;
       let tempInterested = 0;
       let tempNotGoing = 0;
 
-      for (let i = 0; i < arr.length; i++) {
-        if (arr[i] === 1) tempGoing += 1;
-        else if (arr[i] === 2) tempInterested += 1;
-        else if (arr[i] === 3) tempNotGoing += 1;
+      const goingUserId = [];
+      for (let i = 0; i < statusArr.length; i++) {
+        if (statusArr[i] === 1) {
+          goingUserId.push(allAttendyId[i]);
+          tempGoing += 1;
+        }
+        else if (statusArr[i] === 2) tempInterested += 1;
+        else if (statusArr[i] === 3) tempNotGoing += 1;
       }
 
+      const res = await axios.get(`http://localhost:3000/api/users/getallusers`);
+      console.log('res2:', res.data.users);
+      const allUserId = res.data.users;
+      const goingUserName = [];
+      for(let i = 0; i < goingUserId.length; i++){
+        for(let j = 0; j < allUserId.length; j++){
+          if(goingUserId[i] === allUserId[j].id) {
+            goingUserName.push(allUserId[j].username);
+            break;
+          }
+        }
+      }
+      setgoingUserName(goingUserName);
       setGoingCount(tempGoing);
       setInterestedCount(tempInterested);
       setNotGoingCount(tempNotGoing);
 
-      //console.log('Going: ', goingCount);
       //console.log('Notgoing: ', notGoingCount);
     } 
   }
+  console.log('Going: ', goingUserName);
 
   const fetchEventDetails = async () => {
     try {
@@ -133,24 +153,34 @@ const EventDetails: React.FC = () => {
         <MapPin className="w-5 h-5 mr-2 text-gray-500" />
         <span>{event.location}</span>
       </div>
-      <div className="">
-        {/* //<div> */}
+      <div className="flex items-center">
           <Calendar className="w-5 h-5 mr-2 text-gray-500" />
-          <span>
+           <span> 
             {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}
-          </span>
-        <div className="ml-72 flex gap-4">
+           </span> 
+      </div>
+      <div className="flex justify-between items-center">
+        <div>
+          
+        <Menu>
+          <MenuButton as={Button}>Attendy</MenuButton>
+          <MenuList>
+            { goingUserName.length > 0 ? (goingUserName.map(res => <MenuItem>{res}</MenuItem>)): (<MenuItem>No User</MenuItem>)}
+          </MenuList>
+        </Menu>
+        </div>
+        <div className="flex gap-4">
           <div onClick={() => handleStatusChange(1)} className={selectedStatus === 1 ? "text-green-500" : "text-gray-500"}>
-          <IoMdCheckmarkCircle className="w-6 h-6 cursor-pointer" />
-          <span>Going ({goingCount})</span>
+            <IoMdCheckmarkCircle className="w-6 h-6 cursor-pointer" />
+            <span>Going ({goingCount})</span>
           </div>
-          <div onClick={() => handleStatusChange(2)} className={selectedStatus === 2 ? "text-blue-500" : "text-gray-500"}>            
+          <div onClick={() => handleStatusChange(2)} className={selectedStatus === 2 ? "text-blue-500" : "text-gray-500"}>
             <FaStar className="w-6 h-6 cursor-pointer" />
-              <span>Interested ({interestedCount})</span>
+            <span>Interested ({interestedCount})</span>
           </div>
           <div onClick={() => handleStatusChange(3)} className={selectedStatus === 3 ? "text-red-500" : "text-gray-500"}>
             <MdDangerous className="w-6 h-6 cursor-pointer" />
-              <span>Not Going ({notGoingCount})</span>
+            <span>Not Going ({notGoingCount})</span>
           </div>
         </div>
       </div>

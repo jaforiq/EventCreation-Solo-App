@@ -1,6 +1,6 @@
 import { Request, RequestHandler, Response } from "express";
 import Event from "../models/Event";
-import { EventGenre, Genre } from "../models";
+import { EventGenre } from "../models";
 
 export const createEvent: RequestHandler = async (
   req: Request,
@@ -133,7 +133,6 @@ export const getEventsById: RequestHandler = async (
   res: Response
 ): Promise<void> => {
   const { id } = req.params;
-  //const userId = (req as any).user?.id;
 
   try {
     const event = await Event.findOne({ where: { id } });

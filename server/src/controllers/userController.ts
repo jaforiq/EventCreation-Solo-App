@@ -55,3 +55,17 @@ export const login: RequestHandler = async (
     return;
   }
 };
+
+export const getAllUsers: RequestHandler = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const users = await User.findAll();
+    res.status(200).json({ users });
+    return;
+  } catch (error) {
+    res.status(500).json({ message: "Error retrieving events", error });
+    return;
+  }
+};

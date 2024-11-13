@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Attendy } from "../models";
 
+// If attendy exist then updated if not than create attendy
 export const createUpdateAttendy = async (req: Request, res: Response) => {
   const { eventId } = req.params;
   const userId = (req as any).user?.id;
@@ -67,17 +68,19 @@ export const getAllEventAttendy = async (req: Request, res: Response) => {
 
   const attendy = await Attendy.findAll({
     where: { eventId },
-    attributes: ["status"],
+    //attributes: ["status"],
   });
+  //console.log("att: ", attendy);
   const arrStatus: number[] = attendy.map((a) => a.dataValues.status);
-  console.log("Event Attendy: : ", arrStatus);
+  const arrUserId: number[] = attendy.map((a) => a.dataValues.userId);
+  console.log("Event Attendy: : ", arrUserId);
   // for (let i = 0; i < attendy.length; i++) {
   //   const val = attendy[i].dataValues.status;
   //   arrStatus.push(val);
   // }
 
   if (attendy) {
-    res.status(200).json({ arrStatus });
+    res.status(200).json({ arrStatus, arrUserId });
   } else {
     const emptyArr: number[] = [];
     res.status(200).json({ emptyArr });

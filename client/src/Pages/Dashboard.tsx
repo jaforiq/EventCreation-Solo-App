@@ -13,7 +13,8 @@ function App() {
   const [isLogin, setIsLogin] = useState(false);
   const [events, setEvents] = useState<EventData[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
-  
+  const [loginUserId, setLoginUserId] = useState(0);
+
   const searchByTitleRef = createRef<HTMLInputElement>();
   const searchByLocationRef = createRef<HTMLInputElement>();
 
@@ -21,6 +22,7 @@ function App() {
     const response = await axios.get('http://localhost:3000/api/events/all');
 
     const res = response.data.data;
+    console.log('res: ', res);
     if (!res) {
       throw new Error('Failed to fetch event details');
     }
@@ -29,7 +31,8 @@ function App() {
       title: res.title,
       details: res.details,
       thumbnailUrl: res.thumbnailUrl,
-      location: res.location
+      location: res.location,
+      userId: res.userId
     }));
     setEvents(result);
   }
@@ -39,7 +42,9 @@ function App() {
 
     const token = localStorage.getItem('token');
     axios.get('http://localhost:3000/api/me', { headers: { authorization: `Bearer ${token}` } }).then((res) => {
+      console.log("resData: ", res.data);
       setIsLogin(res.data.status)
+      setLoginUserId(res.data.id);
     }).catch((error) => {
       console.log(error)
     });
@@ -137,7 +142,7 @@ function App() {
         </div>
       </header>
 
-      <EventCard events={events} setEvents={setEvents} />    
+      <EventCard events={events} setEvents={setEvents} loginUserId={loginUserId} />    
     </div>
   );
 }
