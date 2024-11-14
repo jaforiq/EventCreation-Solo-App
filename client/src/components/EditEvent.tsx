@@ -62,6 +62,29 @@ const EditEvent: React.FC = () => {
     const { name, value } = e.target;
     setEventData((prev) => ({ ...prev, [name]: value }));
   };
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("Inside FileChange");
+    const cloudName = "dvrwupgzz";
+    const presetName = "fr3ws4o";
+    
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', presetName);
+  
+      fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: 'POST',
+        body: formData,
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log("Res:", data);
+          setEventData(prev => ({ ...prev, thumbnailUrl: data.secure_url }));
+        })
+        .catch(error => console.log(error));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,7 +164,7 @@ const EditEvent: React.FC = () => {
             <Input
               name="thumbnailUrl"
               value={eventData.thumbnailUrl}
-              onChange={handleInputChange}
+              onChange={handleFileChange}
             />
           </FormControl>
           <Button type="submit" colorScheme="teal">

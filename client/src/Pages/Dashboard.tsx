@@ -8,6 +8,7 @@ import { Input, InputGroup, InputRightAddon } from '@chakra-ui/react';
 import DefaultSpinner from '@/components/DefaultSpinner';
 import { event, EventData } from '@/Interfaces/event';
 import EventCard from '@/components/EventCard';
+import React from 'react';
 
 function App() {
   const [isLogin, setIsLogin] = useState(false);
@@ -42,8 +43,8 @@ function App() {
     let count = 0;
     
     try {
-      count = count + 1;
-      console.log('count: ',count);
+      // count = count + 1;
+      // console.log('count: ',count);
       const response = await axios.get(`http://localhost:3000/api/events/all`, {
         params: { page, pageSize },
       });
@@ -56,6 +57,8 @@ function App() {
           thumbnailUrl: event.thumbnailUrl,
           location: event.location,
           userId: event.userId,
+          endDate: event.endDate,
+          startDate: event.startDate
         }));
         setEvents((prevEvents) => [...prevEvents, ...newEvents]);
       } else {
@@ -138,32 +141,100 @@ function App() {
   //   };
   // };
 
-  const onSearch = debounce(async () => {
-    const title = searchByTitleRef.current?.value.trim();
-    const location = searchByLocationRef.current?.value.trim();
-  
-    if (!title) {
-      await fetchEvents(); // Fetch all events if the title is empty
+  const [inputValue, setInputValue] = useState("");
+  const [debouncedInputValue, setDebouncedInputValue] = useState("");
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(event.target.value);
+  };
+
+  React.useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedInputValue(inputValue);
+    }, 500);
+    return () => clearTimeout(timeoutId);
+  }, [inputValue, 500]);
+
+  useEffect( () => {
+    try {
+          if (debouncedInputValue == '') {
+       fetchEvents()
       return;
     }
-  
-    try {
-      const response = await axios.get(`http://localhost:3000/api/events/searchtitle?title=${encodeURIComponent(title)}`)
+  axios.get(`http://localhost:3000/api/events/searchtitle?title=${encodeURIComponent(debouncedInputValue)}`).then((response)=> {
       const searchResults = response.data.data;
-console.log('src Res: ', searchResults);
-      setEvents(searchResults);
+// console.log('src Res: ', searchResults);
+      const newEvents = searchResults.map((event: event) => ({
+      id: event.id,
+      title: event.title,
+      details: event.details,
+      thumbnailUrl: event.thumbnailUrl,
+      location: event.location,
+      userId: event.userId,
+      endDate: event.endDate,
+      startDate: event.startDate
+      }));
+      setEvents(newEvents);
+    })
     } catch (error) {
       console.error('Error fetching search results:', error);
     }
-  }, 3000);  
+  }, [debouncedInputValue])
+
+//   const onSearch = debounce(async () => {
+//     const title = searchByTitleRef.current?.value.trim();
+//     const location = searchByLocationRef.current?.value.trim();
   
-  console.log('event.len: ', events.length);
+//     if (!title) {
+//       await fetchEvents(); // Fetch all events if the title is empty
+//       return;
+//     }
+  
+//     try {
+//       const response = await axios.get(`http://localhost:3000/api/events/searchtitle?title=${encodeURIComponent(title)}`)
+//       const searchResults = response.data.data;
+// // console.log('src Res: ', searchResults);
+//       const newEvents = searchResults.map((event: event) => ({
+//       id: event.id,
+//       title: event.title,
+//       details: event.details,
+//       thumbnailUrl: event.thumbnailUrl,
+//       location: event.location,
+//       userId: event.userId,
+//       endDate: event.endDate,
+//       startDate: event.startDate
+//       }));
+//       setEvents(newEvents);
+      
+//     } catch (error) {
+//       console.error('Error fetching search results:', error);
+//     }
+//   }, 3000);  
+console.log('Events: ', events);
+
+const onSearch = debounce(async () => {
+  const title = searchByTitleRef.current?.value.trim();
+  if (!title) {
+    setPage(1); // Reset page if title is empty
+    await fetchEvents(); // Fetch all events
+    return;
+  }
+  try {
+    const response = await axios.get(`http://localhost:3000/api/events/searchtitle?title=${encodeURIComponent(title)}`);
+    setEvents(response.data.data);
+  } catch (error) {
+    console.error(error);
+  }
+}, 300); // Adjust delay for responsiveness
+
+  
+  // console.log('event.len: ', events.length);
 
   const logout = () => {
     localStorage.removeItem('token');
     setIsLogin(false);
   };
-  console.log("Login: ", isLogin)
+  // console.log("Login: ", isLogin)
 
   if (isLoading) return <div className='absolute top-[48%] left-[48%]'><DefaultSpinner /></div>
 
@@ -180,11 +251,11 @@ console.log('src Res: ', searchResults);
                   src={logo}
                   alt="Meetup Logo"
                   className="h-8"
-                />
+                />()
               </a>
               {/* Search Bar */}
               <InputGroup>
-                <Input ref={searchByTitleRef} type='text' className='m-0 rounded-l-lg' placeholder='Search by event title' onChange={() => onSearch()}/>
+                <Input ref={searchByTitleRef} type='text' className='m-0 rounded-l-lg' placeholder='Search by event title' onChange={handleInputChange}/>
                 <Input ref={searchByLocationRef} type='text' className='m-0' rounded={'none'} placeholder='Search by location' onChange={() => onSearch()}/>
                 <InputRightAddon children={<Search className="h-5 w-5" />} onChange={() => onSearch()} />
               </InputGroup>
