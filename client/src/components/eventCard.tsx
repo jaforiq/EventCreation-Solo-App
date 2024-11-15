@@ -13,7 +13,7 @@ interface EventCardProps {
 const EventCard = (props: EventCardProps) => {
   const { events, setEvents, loginUserId } = props;
 
-// console.log('card: ', events);
+console.log('card: ', events);
   const toast = useToast();
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
@@ -44,52 +44,45 @@ const EventCard = (props: EventCardProps) => {
       isClosable: true,
     })
   }
-console.log('card2: ', events);
+
+
+
   return (
     <div className="w-full mt-5">
       <div className="flex flex-wrap justify-center items-center mx-auto w-full gap-8">
       {events.length > 0 && events.map((res) => (
-  // console.log('res', res);
-
-    <Card className='cursor-pointer' maxW='sm' key={res.id} onClick={() => handleCardClick(res.id)}>
-      <h1>{res.id}</h1>
-      <CardBody>
-        <Image
-          className='m-auto h-[15rem]'
-          src={res.thumbnailUrl ?? emptyImage}
-          alt={res.title}
-          objectFit='cover'
-          borderRadius='lg'
-        />
-        <Stack mt='6' spacing='3'>
-          <Heading size='md' className='max-h-[30px] truncate'>{res.title}</Heading>
-          <Text className='h-[120px] overflow-scroll text-ellipsis[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'>{res.details}</Text>
-        </Stack>
-      </CardBody>
-      {res.userId === loginUserId ? (
-        <CardFooter>
-          <ButtonGroup spacing='2'>
-            <Button variant='solid' colorScheme='blue' onClick={async (e) => await handleEditClick(e, res.id)}>
-              Edit
-            </Button>
-            <Button variant='ghost' colorScheme='blue' onClick={async (e) => await handleDeleteClick(e, res.id)}>
-              Delete
-            </Button>
-          </ButtonGroup>
-        </CardFooter>
-      ) : (
-        <CardFooter>
-          <ButtonGroup spacing='2'></ButtonGroup>
-        </CardFooter>
-      )}
-    </Card>
-      )
-)}
-
+      <Card className='cursor-pointer' maxW='sm' key={res.id} onClick={() => handleCardClick(res.id)}>
+        <CardBody>
+          <Image
+            className='m-auto h-[15rem]'
+            src={res.thumbnailUrl ?? emptyImage}
+            alt={res.title}
+            objectFit='cover'
+            borderRadius='lg'
+          />
+          <Stack mt='6' spacing='3'>
+            <Heading size='md' className='max-h-[30px] truncate'>{res.title}</Heading>
+            <Text className='h-[120px] overflow-scroll text-ellipsis[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'>{res.details}</Text>
+          </Stack>
+        </CardBody>
+        {res.userId === loginUserId ? (
+          <CardFooter>
+            <ButtonGroup spacing='2'>
+              <Button variant='solid' colorScheme='blue' onClick={async (e) => await handleEditClick(e, res.id)}>
+                Edit
+              </Button>
+              <Button variant='ghost' colorScheme='blue' onClick={async (e) => await handleDeleteClick(e, res.id)}>
+                Delete
+              </Button>
+            </ButtonGroup>
+          </CardFooter>
+        ) : (
+          <CardFooter>
+            <ButtonGroup spacing='2'></ButtonGroup>
+          </CardFooter>)}
+      </Card>))}
       </div>
     </div>
-  );
-
-}
+  );}
 
 export default EventCard;

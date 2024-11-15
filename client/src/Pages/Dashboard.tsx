@@ -1,50 +1,36 @@
-import { debounce } from 'lodash';
-import { Search, Globe, Menu } from 'lucide-react';
+import React from 'react';
+import axios from 'axios';
 import logo from "../images/ui-1.svg";
 import { Link } from 'react-router-dom';
-import { createRef, useEffect,  useState } from 'react';
-import axios from 'axios';
-import { Input, InputGroup, InputRightAddon } from '@chakra-ui/react';
-import DefaultSpinner from '@/components/DefaultSpinner';
-import { event, EventData } from '@/Interfaces/event';
 import EventCard from '@/components/EventCard';
-import React from 'react';
+import { Search, Globe, Menu } from 'lucide-react';
+import { event, EventData } from '@/Interfaces/event';
+import { createRef, useEffect,  useState } from 'react';
+import DefaultSpinner from '@/components/DefaultSpinner';
+import { Input, InputGroup, InputRightAddon } from '@chakra-ui/react';
 
 function App() {
+  const [page, setPage] = useState(1);
   const [isLogin, setIsLogin] = useState(false);
+  const [loginUserId, setLoginUserId] = useState(0);
   const [events, setEvents] = useState<EventData[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
-  const [loginUserId, setLoginUserId] = useState(0);
-  const [page, setPage] = useState(1);
   const pageSize = 30;
+
+  // For debounching
+  const [inputValue, setInputValue] = useState("");
+  const [debouncedInputValue, setDebouncedInputValue] = useState("");
 
   const searchByTitleRef = createRef<HTMLInputElement>();
   const searchByLocationRef = createRef<HTMLInputElement>();
 
-  // const fetchEvents = async () => {
-  //   const response = await axios.get('http://localhost:3000/api/events/all');
-
-  //   const res = response.data.data;
-  //   console.log('res: ', res);
-  //   if (!res) {
-  //     throw new Error('Failed to fetch event details');
-  //   }
-  //   const result = response.data.data.map((res: event) => ({
-  //     id: res.id,
-  //     title: res.title,
-  //     details: res.details,
-  //     thumbnailUrl: res.thumbnailUrl,
-  //     location: res.location,
-  //     userId: res.userId
-  //   }));
-  //   setEvents(result);
-  // }
   const fetchEvents = async () => {
     let count = 0;
     
     try {
-      // count = count + 1;
-      // console.log('count: ',count);
+      count = count + 1;
+      console.log('fatchEventsCount: ',count);
+      console.log('Page: ',page);
       const response = await axios.get(`http://localhost:3000/api/events/all`, {
         params: { page, pageSize },
       });
@@ -76,11 +62,13 @@ function App() {
 
   // Function to load more events when the user scrolls to the bottom
   const handleScroll = () => {
+    console.log('handleScroll start');
     if (
       window.innerHeight + document.documentElement.scrollTop !==
       document.documentElement.offsetHeight
     )
       return;
+    console.log('handralScroll end');  
     setPage((prevPage) => prevPage + 1);
   };
 
@@ -94,7 +82,8 @@ function App() {
     setLoading(true);
 
     const token = localStorage.getItem('token');
-    axios.get('http://localhost:3000/api/me', { headers: { authorization: `Bearer ${token}` } }).then((res) => {
+    axios.get('http://localhost:3000/api/me', { headers: { authorization: `Bearer ${token}` } })
+    .then((res) => {
       console.log("resData: ", res.data);
       setIsLogin(res.data.status)
       setLoginUserId(res.data.id);
@@ -107,42 +96,6 @@ function App() {
   }, []);
 
 
-  // const onSearch = async () => {
-  //   const title = searchByTitleRef.current!.value.trim();
-  //   const location = searchByLocationRef.current!.value.trim();
-  
-  //   // Fetch all events if both inputs are empty
-  //   if (!title && !location) {
-  //     await fetchEvents();
-  //     return;
-  //   }
-  
-  //   // Filter events based on the search inputs
-  //   let searchedEvents = events;
-  //   if (title) {
-  //     searchedEvents = searchedEvents.filter(event =>
-  //       event.title.toLowerCase().includes(title.toLowerCase())
-  //     );
-  //   }
-  //   if (location) {
-  //     searchedEvents = searchedEvents.filter(event =>
-  //       event.location?.toLowerCase().includes(location.toLowerCase())
-  //     );
-  //   }
-  
-  //   setEvents([...searchedEvents]);
-  // };
-
-  // const debounce = (func: (...args: any) => void, delay: number) => {
-  //   let timeoutId: NodeJS.Timeout;
-  //   return (...args: any) => {
-  //     clearTimeout(timeoutId);
-  //     timeoutId = setTimeout(() => func(...args), delay);
-  //   };
-  // };
-
-  const [inputValue, setInputValue] = useState("");
-  const [debouncedInputValue, setDebouncedInputValue] = useState("");
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(event.target.value);
@@ -153,33 +106,67 @@ function App() {
       setDebouncedInputValue(inputValue);
     }, 500);
     return () => clearTimeout(timeoutId);
-  }, [inputValue, 500]);
+  }, [inputValue,500]);
 
-  useEffect( () => {
+//   useEffect( () => {
+//     try {
+//       if (debouncedInputValue == '') {
+//        fetchEvents()
+//       return;
+//     }
+//       axios.get(`http://localhost:3000/api/events/searchtitle?title=${encodeURIComponent(debouncedInputValue)}`).then((response)=> {
+//       const searchResults = response.data.data;
+// // console.log('src Res: ', searchResults);
+//       const newEvents = searchResults.map((event: event) => ({
+//       id: event.id,
+//       title: event.title,
+//       details: event.details,
+//       thumbnailUrl: event.thumbnailUrl,
+//       location: event.location,
+//       userId: event.userId,
+//       endDate: event.endDate,
+//       startDate: event.startDate
+//       }));
+//       setEvents(newEvents);
+//     })
+//     } catch (error) {
+//       console.error('Error fetching search results:', error);
+//     }
+//   }, [debouncedInputValue])
+
+
+useEffect(() => {
+  const fetchSearchResults = async () => {
     try {
-          if (debouncedInputValue == '') {
-       fetchEvents()
-      return;
-    }
-  axios.get(`http://localhost:3000/api/events/searchtitle?title=${encodeURIComponent(debouncedInputValue)}`).then((response)=> {
+      if (debouncedInputValue === '') {
+        console.log('Empty Debounce call fetchEvents');
+        await fetchEvents(); // Fetch all events if no input value
+        return;
+      }
+console.log('Fetch data with title');
+      const response = await axios.get(`http://localhost:3000/api/events/searchtitle?title=${encodeURIComponent(debouncedInputValue)}`);
       const searchResults = response.data.data;
-// console.log('src Res: ', searchResults);
-      const newEvents = searchResults.map((event: event) => ({
-      id: event.id,
-      title: event.title,
-      details: event.details,
-      thumbnailUrl: event.thumbnailUrl,
-      location: event.location,
-      userId: event.userId,
-      endDate: event.endDate,
-      startDate: event.startDate
+
+      const newEvents = searchResults.map((event: EventData) => ({
+        id: event.id,
+        title: event.title,
+        details: event.details,
+        thumbnailUrl: event.thumbnailUrl,
+        location: event.location,
+        userId: event.userId,
+        endDate: event.endDate,
+        startDate: event.startDate,
       }));
+      
       setEvents(newEvents);
-    })
     } catch (error) {
       console.error('Error fetching search results:', error);
     }
-  }, [debouncedInputValue])
+  };
+
+  fetchSearchResults();
+}, [debouncedInputValue]);
+
 
 //   const onSearch = debounce(async () => {
 //     const title = searchByTitleRef.current?.value.trim();
@@ -210,25 +197,10 @@ function App() {
 //       console.error('Error fetching search results:', error);
 //     }
 //   }, 3000);  
-console.log('Events: ', events);
+//console.log('Events: ', events);
 
-const onSearch = debounce(async () => {
-  const title = searchByTitleRef.current?.value.trim();
-  if (!title) {
-    setPage(1); // Reset page if title is empty
-    await fetchEvents(); // Fetch all events
-    return;
-  }
-  try {
-    const response = await axios.get(`http://localhost:3000/api/events/searchtitle?title=${encodeURIComponent(title)}`);
-    setEvents(response.data.data);
-  } catch (error) {
-    console.error(error);
-  }
-}, 300); // Adjust delay for responsiveness
 
   
-  // console.log('event.len: ', events.length);
 
   const logout = () => {
     localStorage.removeItem('token');
@@ -251,13 +223,13 @@ const onSearch = debounce(async () => {
                   src={logo}
                   alt="Meetup Logo"
                   className="h-8"
-                />()
+                />
               </a>
               {/* Search Bar */}
               <InputGroup>
                 <Input ref={searchByTitleRef} type='text' className='m-0 rounded-l-lg' placeholder='Search by event title' onChange={handleInputChange}/>
-                <Input ref={searchByLocationRef} type='text' className='m-0' rounded={'none'} placeholder='Search by location' onChange={() => onSearch()}/>
-                <InputRightAddon children={<Search className="h-5 w-5" />} onChange={() => onSearch()} />
+                <Input ref={searchByLocationRef} type='text' className='m-0' rounded={'none'} placeholder='Search by location' />
+                <InputRightAddon children={<Search className="h-5 w-5" />}  />
               </InputGroup>
             </div>
 
